@@ -192,3 +192,28 @@ async def update_harvest(
         farmer_location=farmer.location if farmer else None,
         producer_type=farmer.producer_type if farmer else None,
     )
+
+
+@router.delete("/harvests/{harvest_id}")
+async def delete_harvest(harvest_id: int, db: AsyncSession = Depends(get_db)):
+    """Safe delete for Farmer Harvest."""
+    harvest = await db.get(Harvest, harvest_id)
+    if not harvest:
+        raise HTTPException(status_code=404, detail="Harvest not found")
+
+    # If the harvest is connected to an active order/request
+    if harvest.reserved_quantity and harvest.reserved_quantity > 0:
+        harvest.status = "closed"
+        harvest.cancelled_at = datetime.now().isoformat()
+        harvest.cancellation_reason = "Farmer removed harvest"
+        await db.commit()
+    else:
+        # Safe to delete completely
+        await db.delete(harvest)
+        await db.commit()
+
+    # Real-time WebSocket broadcast to remove from Buyer dashboard
+    await manager.broadcast_to_all("harvest_deleted", {"id": harvest_id})
+
+    return {"message": "Harvest deleted successfully", "id": harvest_id}
+

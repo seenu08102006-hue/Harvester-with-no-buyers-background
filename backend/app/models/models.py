@@ -188,6 +188,7 @@ class Vehicle(Base):
     transporter_name = Column(String(100), default="Raj Transport Services")
     username = Column(String(50), nullable=True, index=True)
     current_location = Column(String(200), nullable=True)
+    is_active = Column(Boolean, default=True) # Transporter active toggle
     status = Column(String(20), default="available")  # available, assigned, picking_up, in_transit, delivered, unavailable
 
     allocations = relationship("Allocation", back_populates="vehicle", cascade="all, delete-orphan")

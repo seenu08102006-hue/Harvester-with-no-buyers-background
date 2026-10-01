@@ -87,3 +87,11 @@ async def get_ride_history(db: AsyncSession = Depends(get_db)):
     """Admin endpoint to fetch ride history."""
     result = await db.execute(select(RideHistory))
     return result.scalars().all()
+
+@router.delete("/history/reset")
+async def reset_ride_history(db: AsyncSession = Depends(get_db)):
+    """Admin endpoint to reset all ride history safely (doesn't affect active rides)."""
+    # Delete all rows from RideHistory
+    await db.execute(RideHistory.__table__.delete())
+    await db.commit()
+    return {"message": "Riding history has been reset successfully."}
