@@ -80,7 +80,7 @@ export default function Login() {
               <Sprout className="w-8 h-8 text-white" />
             </div>
             <h1 className="font-display text-3xl font-bold text-stone-900 tracking-tight">
-              Harvest<span className="text-primary-500">Link</span> AI
+              Harvest<span className="text-primary-500">Flow</span>.ai
             </h1>
             <p className="text-stone-500 text-sm mt-1">Real-Time Agricultural Supply Chain</p>
           </div>

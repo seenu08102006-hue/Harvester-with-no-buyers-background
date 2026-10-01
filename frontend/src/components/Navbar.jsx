@@ -24,10 +24,10 @@ export default function Navbar() {
             </div>
             <div className="flex flex-col">
               <span className="font-display font-bold text-lg leading-none text-primary-900 tracking-tight">
-                HarvestLink
+                HarvestFlow
               </span>
               <span className="text-[10px] font-semibold text-primary-600 tracking-widest uppercase">
-                AI
+                .ai
               </span>
             </div>
           </Link>

@@ -151,7 +151,7 @@ export default function Landing() {
         <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <p className="text-sm font-semibold text-harvest-600 tracking-widest uppercase mb-3">The Challenge</p>
           <h2 className="font-display text-2xl md:text-3xl font-bold text-stone-900 mb-8">
-            Why HarvestLink AI?
+            Why HarvestFlow.ai?
           </h2>
           <blockquote className="text-lg text-stone-700 leading-relaxed italic border-l-4 border-primary-400 pl-6 text-left">
             "Small tomato farmers lack an intelligent coordination mechanism to match changing harvest quantities and quality with recurring buyer demand and limited transport capacity, while ensuring that collection opportunities are not unfairly concentrated among larger producers."
@@ -161,7 +161,7 @@ export default function Landing() {
 
       {/* Footer */}
       <footer className="py-8 bg-stone-900 text-stone-400 text-center text-sm">
-        <p>© 2026 HarvestLink AI — Built for the Hackathon</p>
+        <p>© 2026 HarvestFlow.ai — Built for the Hackathon</p>
       </footer>
     </div>
   );

@@ -55,7 +55,7 @@ export default function FarmerDashboard() {
   const [aiMessages, setAiMessages] = useState([
     {
       role: 'ai',
-      text: "👋 Hello! I'm your AI Harvest Assistant.\n\nTell me what you've harvested in natural language — for example:\n• \"I harvested 500 of Grade A tomatoes ready tomorrow at 25\"\n• \"Add 1200 tomato grade B in Kolar\"\n\nI'll automatically parse and register your harvest!"
+      text: "👋 Hello! I'm your AI Harvest Assistant.\n\nJust tell me two things:\n• **How many kg?**\n• **Price per kg (₹)?**\n\nFor example:\n• \"500 kg at 25\"\n• \"1200 kg ₹30 per kg\"\n\nI'll handle everything else automatically!"
     }
   ]);
 
@@ -303,27 +303,31 @@ export default function FarmerDashboard() {
     if (!parsedData) {
       await new Promise(r => setTimeout(r, 450));
       const lower = userMsg.toLowerCase();
-      const qtyMatch = lower.match(/(\d+(?:\.\d+)?)\s*(?:kg|kilos?|kgs|quintals?|tons?)/i) || lower.match(/(\d+)\s*(?:bags?|crates?)/i) || lower.match(/(\d+)/);
-      const gradeMatch = lower.match(/grade\s*([abc])/i) || lower.match(/\b([abc])\s*grade\b/i);
-      const priceMatch = lower.match(/(?:rs\.?|₹|inr)\s*(\d+(?:\.\d+)?)/i) || lower.match(/(\d+(?:\.\d+)?)\s*(?:rs|rupees?|\/kg|per\s*kg)/i);
-      const cropMatch = lower.match(/(tomato(?:es)?|potato(?:es)?|onion(?:s)?|carrot(?:s)?|cabbage|chilli|mango(?:es)?)/i);
+      // Only extract kg and price/kg — nothing else needed
+      const qtyMatch = lower.match(/(\d+(?:\.\d+)?)\s*(?:kg|kilos?|kgs)/i) || lower.match(/(\d+)/);
+      const priceMatch = lower.match(/(?:rs\.?|₹|inr|at|@)\s*(\d+(?:\.\d+)?)/i) || lower.match(/(\d+(?:\.\d+)?)\s*(?:rs|rupees?|\/kg|per\s*kg)/i);
 
       const qty = qtyMatch ? parseFloat(qtyMatch[1]) : null;
-      const grade = gradeMatch ? gradeMatch[1].toUpperCase() : 'A';
-      const price = priceMatch ? parseFloat(priceMatch[1]) : (grade === 'A' ? 28 : (grade === 'B' ? 22 : 16));
-      const crop = cropMatch ? (cropMatch[1].charAt(0).toUpperCase() + cropMatch[1].slice(1)) : 'Tomato';
+      // Try to get a second number as price if not explicitly matched
+      let price = priceMatch ? parseFloat(priceMatch[1]) : null;
+      if (!price && qty) {
+        const allNums = lower.match(/\d+(?:\.\d+)?/g);
+        if (allNums && allNums.length >= 2) {
+          const secondNum = parseFloat(allNums[1]);
+          if (secondNum !== qty && secondNum < qty) price = secondNum;
+        }
+      }
+      if (!price) price = 25; // sensible default
 
-      const tomorrow = new Date();
-      tomorrow.setDate(tomorrow.getDate() + 1);
-      const dateStr = lower.includes('tomorrow') ? tomorrow.toISOString().split('T')[0] : new Date().toISOString().split('T')[0];
+      const todayStr = new Date().toISOString().split('T')[0];
 
       if (qty) {
         parsedData = {
-          crop,
+          crop: 'Tomato',
           estimated_quantity: qty,
-          quality_grade: grade,
-          harvest_date: dateStr,
-          available_date: dateStr,
+          quality_grade: 'A',
+          harvest_date: todayStr,
+          available_date: todayStr,
           location: farmer?.location || 'Kolar District',
           expected_price: price,
         };
@@ -334,12 +338,12 @@ export default function FarmerDashboard() {
       setAiParsed(parsedData);
       setAiMessages(prev => [...prev, {
         role: 'ai',
-        text: `✅ **Harvest Identified!**\n\n• **Crop:** ${parsedData.crop}\n• **Quantity:** ${parsedData.estimated_quantity}\n• **Quality:** Grade ${parsedData.quality_grade}\n• **Harvest Date:** ${parsedData.harvest_date}\n• **Price:** ₹${parsedData.expected_price || 'Market Rate'}\n• **Location:** ${parsedData.location}\n\nWould you like me to register this harvest now? Click **"Confirm & Add Harvest"** below.`
+        text: `✅ **Harvest Ready!**\n\n• **Quantity:** ${parsedData.estimated_quantity} kg\n• **Price:** ₹${parsedData.expected_price}/kg\n\nClick **"Confirm & Add Harvest"** below to register it.`
       }]);
     } else {
       setAiMessages(prev => [...prev, {
         role: 'ai',
-        text: `⚠️ I couldn't identify the quantity from your message. Please specify the quantity, e.g.:\n\n*"I have 500 of Grade A tomatoes ready for harvest tomorrow at ₹25."*`
+        text: `⚠️ I couldn't understand that. Just tell me:\n\n*"500 kg at 25"* or *"1200 kg ₹30/kg"*`
       }]);
     }
     setAiLoading(false);
@@ -393,7 +397,7 @@ export default function FarmerDashboard() {
             <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-primary-400 to-primary-600 flex items-center justify-center">
               <Sprout className="w-5 h-5 text-white" />
             </div>
-            <span className="font-bold text-lg text-stone-900">HarvestLink <span className="text-primary-500">AI</span></span>
+            <span className="font-bold text-lg text-stone-900">HarvestFlow<span className="text-primary-500">.ai</span></span>
           </div>
           <div className="flex items-center gap-3">
             <button onClick={() => setActiveTab('notifications')} className="relative p-2 rounded-xl hover:bg-stone-100 transition-colors">
@@ -1056,7 +1060,7 @@ export default function FarmerDashboard() {
                   onChange={e => setAiInput(e.target.value)}
                   onKeyDown={e => e.key === 'Enter' && handleAISend()}
                   className="flex-1 px-4 py-3 rounded-xl border border-stone-200 focus:ring-2 focus:ring-violet-500/30 focus:border-violet-500 outline-none text-sm"
-                  placeholder="e.g. I have 400 Grade A tomatoes for tomorrow at ₹25..."
+                  placeholder="e.g. 500 kg at 25..."
                 />
                 <button
                   onClick={handleAISend}
