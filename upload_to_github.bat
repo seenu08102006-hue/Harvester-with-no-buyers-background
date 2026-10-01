@@ -4,7 +4,13 @@ echo   Uploading HarvestLink AI to GitHub
 echo ==============================================
 echo.
 
-echo Pushing code to https://github.com/pca28234-cloud/AiHAck.git...
+echo Step 1: Adding all changes...
+git add .
+
+echo Step 2: Committing changes...
+git commit -m "Update HarvestLink AI project"
+
+echo Step 3: Pushing to https://github.com/pca28234-cloud/AiHAck.git...
 git push -u origin main
 
 echo.
@@ -17,3 +23,4 @@ if %errorlevel% equ 0 (
 )
 echo.
 pause
+
